@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: adminer-service
+  namespace: stagging
+spec:
+  selector: 
+   app: adminer
+  ports:
+    - protocol: TCP
+      port: 9090
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: adminer-deployment
+  namespace: stagging
+spec:
+  selector:
+    matchLabels:
+      app: adminer
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: adminer
+    spec:
+      containers:
+      - name: adminer-container
+        image: adminer:standalone
+        ports:
+         - containerPort: 8080

@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: pgsql-statefulset
+  namespace: stagging
+spec:
+  serviceName: "pgsql"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pgsql
+  template:
+    metadata:
+      labels:
+        app: pgsql
+    spec:
+      containers:
+      - name: pgsql-container
+        image: postgres:11
+        env:
+        - name: POSTGRES_USER
+          valueFrom:
+           secretKeyRef:
+            name: pgsql-secret #the name of our secret
+            key: user  #the key needed from our secret
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+           secretKeyRef:
+            name: pgsql-secret #the name of our secret
+            key: pass  #the key needed from our secret
+        ports:
+        - containerPort: 5432
+          name: pgsql
+        volumeMounts:
+        - name: pgsql-pvc
+          mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+  - metadata:
+      name: pgsql-pvc
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 5Gi
+      storageClassName: local-storage
